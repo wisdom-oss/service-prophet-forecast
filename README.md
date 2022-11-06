@@ -2,7 +2,7 @@
 
 The prophet forecast microservice uses the prophet forecasting library published by Facebook to forecast
 the water usages. Furthermore, the microservice will use the current population forecasts to calculate a
-per-person water usage.
+per-person water usage in cubic meters.
 
 Information on how to access this service are available in the openapi.yaml
 
