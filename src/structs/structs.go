@@ -16,3 +16,17 @@ type RequestError struct {
 	ErrorTitle       string `json:"errorName"`
 	ErrorDescription string `json:"errorDescription"`
 }
+
+// ResultDataPoint represents a single data point and its deviation
+type ResultDataPoint struct {
+	Date       string  `json:"ds"`
+	LowerBound float64 `json:"lower"`
+	Forecast   float64 `json:"forecast"`
+	UpperBound float64 `json:"upper"`
+}
+
+type DataResponse struct {
+	LowMigrationData    []ResultDataPoint `json:"lowMigrationPrognosis"`
+	MediumMigrationData []ResultDataPoint `json:"mediumMigrationPrognosis"`
+	HighMigrationData   []ResultDataPoint `json:"highMigrationPrognosis"`
+}
