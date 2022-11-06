@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+
 	"microservice/handlers"
 	"microservice/vars"
 )
@@ -33,16 +34,18 @@ func main() {
 	// Set up the routing of the different functions
 	router := mux.NewRouter()
 	router.HandleFunc("/ping", handlers.PingHandler)
-	router.Handle("/", handlers.AuthorizationCheck(
-		http.HandlerFunc(handlers.BasicHandler),
-	))
+	router.Handle(
+		"/", handlers.AuthorizationCheck(
+			http.HandlerFunc(handlers.ForecastRequestHandler),
+		),
+	)
 
 	// Configure the HTTP server
 	server := &http.Server{
 		Addr:         fmt.Sprintf("0.0.0.0:%d", vars.ListenPort),
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
+		WriteTimeout: time.Minute * 5,
+		ReadTimeout:  time.Minute * 5,
+		IdleTimeout:  time.Minute * 5,
 		Handler:      router,
 	}
 
@@ -57,6 +60,8 @@ func main() {
 
 	cancelSignal := make(chan os.Signal, 1)
 	signal.Notify(cancelSignal, os.Interrupt)
+
+	log.Info("Ready to receive requests")
 
 	// Block further code execution until the shutdown signal was received
 	<-cancelSignal
