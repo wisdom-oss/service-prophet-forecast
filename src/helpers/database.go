@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"microservice/structs"
+	"microservice/vars"
 )
 
 // ReadDataForProphet accepts a Rows object which has the following columns: year,
@@ -34,7 +35,8 @@ func ReadDataForProphet(rows *sql.Rows) ([]structs.ProphetDataset, error) {
 }
 
 func WriteDataToFile(content any, filename string) (int, error) {
-	file, fileCreationError := os.Create(filename)
+	filepath := fmt.Sprintf("%s/%s", vars.TemporaryDataDirectory, filename)
+	file, fileCreationError := os.Create(filepath)
 	if fileCreationError != nil {
 		return -1, fileCreationError
 	}

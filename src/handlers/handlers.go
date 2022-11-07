@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -169,6 +170,7 @@ func ForecastRequestHandler(responseWriter http.ResponseWriter, request *http.Re
 		// Generate a new uuid for the request to identify the request later in the r script
 		forecastUUID := uuid.New()
 
+		// Create new temporary directory
 		currentPopulationDataFileName := fmt.Sprintf("current_population_%s.json", forecastUUID.String())
 		lowMigrationLevelPopulationDataFileName := fmt.Sprintf(
 			"low_population_migration_%s.json",
@@ -242,7 +244,8 @@ func ForecastRequestHandler(responseWriter http.ResponseWriter, request *http.Re
 		}
 
 		// Now create a new command call for the rscript...
-		rscriptCommand := exec.Command("Rscript", "./res/prophet.r", forecastUUID.String())
+		rscriptCommand := exec.Command("Rscript", "./res/prophet.r", forecastUUID.String(), vars.TemporaryDataDirectory)
+		rscriptCommand.Stdout = os.Stdout
 		// ... and execute it
 		logger.Info("Starting prognosis in RScript")
 		executionErrors := rscriptCommand.Run()

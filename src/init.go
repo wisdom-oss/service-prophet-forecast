@@ -150,6 +150,13 @@ func init() {
 		}
 	}
 
+	// Now create a new temporary directory
+	var err error
+	vars.TemporaryDataDirectory, err = os.MkdirTemp(os.TempDir(), "*")
+	if err != nil {
+		logger.WithError(err).Fatal("unable to create a temporary file directory")
+	}
+
 }
 
 /*

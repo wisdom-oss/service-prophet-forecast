@@ -2,10 +2,12 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"microservice/structs"
+	"microservice/vars"
 )
 
 // RequestHasQueryParameters returns a byte which shows the parameters available in the request. The single bits are
@@ -27,7 +29,8 @@ func ReadPrognosisResultFile(fileName string) []structs.ResultDataPoint {
 	var dataPoints []structs.ResultDataPoint
 
 	// Try to read the file
-	fileContents, err := ioutil.ReadFile(fileName)
+	filePath := fmt.Sprintf("%s/%s", vars.TemporaryDataDirectory, fileName)
+	fileContents, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil
 	}

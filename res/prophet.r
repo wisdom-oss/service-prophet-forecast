@@ -8,19 +8,19 @@ p <- arg_parser("Run a new forecast with a prophet-based model")
 
 # Add cli arguments
 p <- add_argument(p, "requestID", help="The request id prepended to all input and output files", type="character")
-
+p <- add_argument(p, "folder", help="The base folder in which the data files are located", type="character")
 # Parse the cli parameters
 argv <- parse_args(p)
 
 # Build the required files
-waterUsagesFile <- paste("water_usage_", argv$requestID, ".json", sep="")
-currentPopulationFile <- paste("current_population_", argv$requestID, ".json", sep="")
-lowPopulationMigrationFile <- paste("low_population_migration_", argv$requestID, ".json", sep="")
-mediumPopulationMigrationFile <- paste("medium_population_migration_", argv$requestID, ".json", sep="")
-highPopulationMigrationFile <- paste("high_population_migration_", argv$requestID, ".json", sep="")
-lowMigrationResultFile <- paste("result_low_migration_", argv$requestID, ".json", sep="")
-mediumMigrationResultFile <- paste("result_medium_migration_", argv$requestID, ".json", sep="")
-highMigrationResultFile <- paste("result_high_migration_", argv$requestID, ".json", sep="")
+waterUsagesFile <- paste(argv$folder, "/water_usage_", argv$requestID, ".json", sep="")
+currentPopulationFile <- paste(argv$folder, "/current_population_", argv$requestID, ".json", sep="")
+lowPopulationMigrationFile <- paste(argv$folder, "/low_population_migration_", argv$requestID, ".json", sep="")
+mediumPopulationMigrationFile <- paste(argv$folder, "/medium_population_migration_", argv$requestID, ".json", sep="")
+highPopulationMigrationFile <- paste(argv$folder, "/high_population_migration_", argv$requestID, ".json", sep="")
+lowMigrationResultFile <- paste(argv$folder, "/result_low_migration_", argv$requestID, ".json", sep="")
+mediumMigrationResultFile <- paste(argv$folder, "/result_medium_migration_", argv$requestID, ".json", sep="")
+highMigrationResultFile <- paste(argv$folder, "/result_high_migration_", argv$requestID, ".json", sep="")
 
 # Read the file contents
 realWaterUsages <- jsonlite::read_json(waterUsagesFile, simplifyVector = TRUE)
@@ -105,7 +105,7 @@ highMigrationPerPersonUsages <- lowerBoundHighMigrationUsages
 highMigrationPerPersonUsages$values <- NULL
 highMigrationPerPersonUsages$lower <- lowerBoundHighMigrationUsages$values
 highMigrationPerPersonUsages$forecast <- forecastedHighMigrationUsages$values
-highMigrationPerPersonUsages$upper <- upperBoundHighMigrationUsages$values 
+highMigrationPerPersonUsages$upper <- upperBoundHighMigrationUsages$values
 
 jsonlite::write_json(lowMigrationPerPersonUsages, lowMigrationResultFile, digits = 10)
 jsonlite::write_json(mediumMigrationPerPersonUsages, mediumMigrationResultFile, digits = 10)

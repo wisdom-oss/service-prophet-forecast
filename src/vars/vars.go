@@ -54,5 +54,8 @@ var PostgresConnection *sql.DB
 var ScopeConfiguration *structs.ScopeInformation
 
 // ExecuteHealthcheck is an indicator for the microservice if the service shall execute a healthcheck.
-//You can trigger a health check by starting the executable with -healthcheck
+// You can trigger a health check by starting the executable with -healthcheck
 var ExecuteHealthcheck bool
+
+// TemporaryDataDirectory contains all files created by either the microservice or the R script
+var TemporaryDataDirectory string
