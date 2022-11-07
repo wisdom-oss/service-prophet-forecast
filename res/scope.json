@@ -1,0 +1,6 @@
+{
+  "$schema": "https://raw.githubusercontent.com/wisdom-oss/documentation/main/schemas/service-scope.schema.json",
+  "name": "Prophet Forecasts",
+  "description": "Allow access to the forecasts made by the prophet container",
+  "scopeStringValue": "forecast:prophet"
+}
