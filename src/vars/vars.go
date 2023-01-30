@@ -9,7 +9,7 @@ import (
 
 // ServiceName is the name of the service which is used for identifying it in the gateway
 // TODO: Change the service name and remove the TODO comment
-const ServiceName = "template-service"
+const ServiceName = "prophet-forecast"
 
 // ===== Required Setting Variables =====
 var (
