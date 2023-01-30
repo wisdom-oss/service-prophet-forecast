@@ -6,7 +6,7 @@ info:
   version: '1.0'
 
 servers:
-  - url: /
+  - url: /prophet-forecast
     description: The default API endpoint for the WISdoM demo server
 
 components:
@@ -42,6 +42,10 @@ components:
 paths:
   /:
     get:
+      parameters:
+        - in: query
+          name: key
+          description: The AGS of a geospatial entity
       summary: Request a new prognosis
       description: |
         While requesting a new prognosis the service uses all data present in the database to create a new prognosis.
