@@ -30,7 +30,7 @@ mediumPopulationMigration <- jsonlite::read_json(mediumPopulationMigrationFile, 
 highPopulationMigration <- jsonlite::read_json(highPopulationMigrationFile, simplifyVector = TRUE)
 
 # Start building the prophet model
-model <- prophet()
+model <- prophet(interval.width = 0.5, weekly.seasonality = FALSE)
 model <- prophet::add_country_holidays(model, "DE")
 modelWaterUsages <- fit.prophet(model, realWaterUsages)
 futureDs <- prophet::make_future_dataframe(modelWaterUsages, 43, freq="year")

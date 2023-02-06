@@ -83,11 +83,12 @@ func ForecastRequestHandler(responseWriter http.ResponseWriter, request *http.Re
 		shapeKeys := request.URL.Query()["key"]
 
 		// Create a regular expression targeting all shapes in the database either starting with a key or matching
-		// the key, if the key is 12 characters long
+		// the key if the key is 12 characters long
 		var shapeKeyRegEx string
 		for _, shapeKey := range shapeKeys {
 			if len(shapeKey) < 12 {
-				shapeKeyRegEx += fmt.Sprintf(`^%s\d+$`, shapeKey)
+				maxKeyLength := 12 - len(shapeKey)
+				shapeKeyRegEx += fmt.Sprintf(`^%s\d{%d}$`, shapeKey, maxKeyLength)
 			} else {
 				shapeKeyRegEx += fmt.Sprintf(`^%s$`, shapeKey)
 			}
