@@ -42,7 +42,8 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(middleware2.AuthorizationCheck)
 	router.Use(middleware2.AdditionalResponseHeaders)
-	router.HandleFunc("/", routes.BasicHandler)
+	router.Use(middleware2.ParseQueryParametersToContext)
+	router.HandleFunc("/", routes.ForecastRequest)
 	router.HandleFunc("/healthcheck", routes.HealthCheck)
 
 	// Configure the HTTP server
