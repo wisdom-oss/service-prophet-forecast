@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Microservice Template
   description: This microservice template is used to allow new developers to start with a new microservice fast
-               The template is written in Golang
+    The template is written in Golang
   version: '1.0'
 
 servers:
@@ -46,6 +46,9 @@ paths:
         - in: query
           name: key
           description: The AGS of a geospatial entity
+          required: true
+          schema:
+            type: string
       summary: Request a new prognosis
       description: |
         While requesting a new prognosis the service uses all data present in the database to create a new prognosis.
@@ -75,9 +78,9 @@ paths:
                     items:
                       $ref: '#/components/schemas/DataPoint'
 
-  /ping:
+  /healthcheck:
     get:
-      summary: Ping the service to test its reachability
+      summary: Ping the service to test its health
       description: The microservice will respond with a 204 No Content when pinging it
       responses:
         '204':
