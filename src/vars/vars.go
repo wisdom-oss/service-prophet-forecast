@@ -4,6 +4,9 @@ package vars
 
 import (
 	"database/sql"
+	"github.com/rs/zerolog"
+
+	"github.com/qustavo/dotsql"
 
 	"microservice/structs"
 )
@@ -44,16 +47,24 @@ var (
 
 	// APIGatewayPort contains the port on which the admin api of the Kong API Gateway listens
 	APIGatewayPort int = 8001
+
+	// QueryFilePath specifies from where the service shall load the sql queries
+	QueryFilePath string = "/res/queries.sql"
 )
 
 // ===== Globally used variables =====
 
-// PostgresConnection is as connection shared throughout the service
+// PostgresConnection is a connection shared throughout the service
 var PostgresConnection *sql.DB
 
 // ScopeConfiguration containing the information about the scope needed to access this service
 var ScopeConfiguration *structs.ScopeInformation
 
-// ExecuteHealthcheck is an indicator for the microservice if the service shall execute a healthcheck.
-// You can trigger a health check by starting the executable with -healthcheck
-var ExecuteHealthcheck bool
+// SqlQueries contains all loaded SQL queries for the project
+var SqlQueries *dotsql.DotSql
+
+// HttpLogger is a logger for routes and similar functions
+var HttpLogger zerolog.Logger
+
+// TemporaryDataDirectory stores the path for the temporary file directory
+var TemporaryDataDirectory string
