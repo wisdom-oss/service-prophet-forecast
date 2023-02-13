@@ -1,26 +1,86 @@
-# TODO: Extend the documentation with the information about your service
 openapi: 3.0.0
 info:
   title: Microservice Template
   description: This microservice template is used to allow new developers to start with a new microservice fast
-               The template is written in Golang
+    The template is written in Golang
   version: '1.0'
 
 servers:
-  - url: /
+  - url: /prophet-forecast
     description: The default API endpoint for the WISdoM demo server
+
+components:
+  schemas:
+    DataPoint:
+      type: object
+      properties:
+        ds:
+          type: string
+          title: Date String
+          description: |
+            The date string referencing the year for which the prognosis is valid. Due to the function of the forecasting
+            library this value is not just a year.
+        lower:
+          type: number
+          title: Lower Prognosis Bound
+          description: |
+            The lower bound of the uncertainty interval for this datapoint calculated by the forecasting library
+        forecast:
+          type: number
+          title: Forecasted Value
+          description: |
+            The forecasted value for this datapoint. This value is not to be used for making business decisions since
+            this value is accompanied by a uncertainty interval which too needs to be considered.
+        upper:
+          type: number
+          title: Upper Prognosis Bound
+          description:  |
+            The upper bound of the uncertainty interval for this datapoint calculated by the forecasting library
+
+
 
 paths:
   /:
     get:
-      summary: Get a test message
-      description: Hello World
+      parameters:
+        - in: query
+          name: key
+          description: The AGS of a geospatial entity
+          required: true
+          schema:
+            type: string
+      summary: Request a new prognosis
+      description: |
+        While requesting a new prognosis the service uses all data present in the database to create a new prognosis.
+        Data points which either do not have a population value or a water usage value are discarded to not falsify the
+        results of the forecast by forecasting values with no model.
+
+        The prognosis currently is influenced by the holidays in Germany. Those values are currently available until the
+        year 2044. Furthermore, the model is only uses usage data in relation to households.
       responses:
         200:
-          description: Hello World
-  /ping:
+          description: Result of the prognosis
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  lowMigrationPrognosis:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataPoint'
+                  mediumMigrationPrognosis:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataPoint'
+                  highMigrationPrognosis:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataPoint'
+
+  /healthcheck:
     get:
-      summary: Ping the service to test its reachability
+      summary: Ping the service to test its health
       description: The microservice will respond with a 204 No Content when pinging it
       responses:
         '204':
