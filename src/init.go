@@ -3,10 +3,13 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
-	"flag"
+	"net/http"
+
 	"fmt"
+	"github.com/qustavo/dotsql"
 	"os"
 	"strconv"
 	"strings"
@@ -40,28 +43,12 @@ var OptionalIntSettings = map[string]*int{
 // OptionalStringSettings associates the name of an environment variable with a pointer to the storage location of the
 // value. If the value is not found a default value will be loaded
 var OptionalStringSettings = map[string]*string{
-	"SCOPE_FILE_LOCATION": &vars.ScopeConfigurationPath,
+	"SCOPE_FILE_LOCATION":     &vars.ScopeConfigurationPath,
+	"SQL_QUERY_FILE_LOCATION": &vars.QueryFilePath,
 }
 
 /*
-Initialization Step 1 - Flag Creation
-
-This initialization step will create a boolean flag which may trigger a healthcheck later on
-*/
-func init() {
-	// Create a new boolean variable flag which uses an existing variable pointer for the value to be assigned
-	flag.BoolVar(
-		&vars.ExecuteHealthcheck,
-		"healthcheck",
-		false,
-		"Run a healthcheck of the service which will check if the service can call itself and is correctly setup on the API gateway",
-	)
-	// Parse the created flags into their variables
-	flag.Parse()
-}
-
-/*
-Initialization Step 2 - Logger Configuration
+Initialization Step - Logger Configuration
 
 This step will set up the logging library logrus for this microservice and set the correct logging level
 */
@@ -82,27 +69,20 @@ func init() {
 	log.SetLevel(logrusLoggingLevel)
 	// Set the formatter for the logging library
 	log.SetFormatter(
-		&log.TextFormatter{
-			// Display the full time stamp in the logs
-			FullTimestamp: true,
-			// Show the levels name fully, even though this may result in shifts between the log lines
-			DisableLevelTruncation: true,
-		},
+		&log.JSONFormatter{},
 	)
 }
 
 /*
-Initialization Step 3 - Required environment variable check
+Initialization Step - Required environment variable check
 
 This initialization step will check the existence of the following variables and if the values are not empty strings:
-  - CONFIG_API_GATEWAY_HOST
-  - CONFIG_API_GATEWAY_ADMIN_PORT
-  - CONFIG_API_GATEWAY_SERVICE_PATH
+- CONFIG_API_GATEWAY_HOST
+- CONFIG_API_GATEWAY_ADMIN_PORT
+- CONFIG_API_GATEWAY_SERVICE_PATH
 
 Furthermore, this step will use sensitive defaults on the following environment variables
-  - CONFIG_HTTP_LISTEN_PORT = 8000
-
-TODO: Add own required and optional variables to this function, if needed
+- CONFIG_HTTP_LISTEN_PORT = 8000
 */
 func init() {
 	logger := log.WithFields(
@@ -152,11 +132,9 @@ func init() {
 }
 
 /*
-Initialization Step 4 - Check the dependency connections
+Initialization Step - Check the dependency connections
 
 This initialization step will check if all dependency containers are reachable.
-
-TODO: Add checks for new dependencies
 */
 func init() {
 	// Create a logger for this step
@@ -206,7 +184,7 @@ func init() {
 }
 
 /*
-Initialization Step 5 - Load the scope setup for this service
+Initialization Step - Load the scope setup for this service
 
 This initialization step will load the supplied scope-example.json file to get the information needed for checking the incoming
 requests for the correct scope
@@ -230,10 +208,54 @@ func init() {
 	if parserError != nil {
 		logger.WithError(parserError).Fatalf("Unable to parse the contents of '%s'", vars.ScopeConfigurationPath)
 	}
+
 }
 
 /*
-Initialization Step 6 - Register service in upstream of the microservice and setup routing
+Initialization Step - Load Scope Configuration
+
+This initialization step will load the supplied scope configuration
+*/
+func init() {
+	logger := log.WithFields(
+		log.Fields{
+			"initStep":     5,
+			"initStepName": "OAUTH2_SCOPE_CONFIGURATION",
+		},
+	)
+	logger.Infof("Reading the scope configuration file from '%s'", vars.ScopeConfigurationPath)
+	fileContents, err := os.ReadFile(vars.ScopeConfigurationPath)
+	if err != nil {
+		logger.WithError(err).Fatal("Unable to read the contents of the scope configuration file")
+	}
+	logger.Debugf("Read the following file contents: %s", fileContents)
+	logger.Debug("Parsing the file contents into the scope configuration for the service")
+
+	parserError := json.Unmarshal(fileContents, &vars.ScopeConfiguration)
+	if parserError != nil {
+		logger.WithError(parserError).Fatalf("Unable to parse the contents of '%s'", vars.ScopeConfigurationPath)
+	}
+
+	// now send the read configuration to the auth service to authenticate users for this service
+	authServiceUrl := fmt.Sprintf("http://%s:8000/auth/scopes/__new", vars.APIGatewayHost)
+
+	request, err := http.NewRequest("PUT", authServiceUrl, bytes.NewBuffer(fileContents))
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		logger.WithError(err).Fatal("Unable to send the scope data to the authorization service")
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		logger.Fatal("Scope was not accepted by the authorization service")
+	}
+}
+
+/*
+Initialization Step - Register service in upstream of the microservice and setup routing
 
 This initialization step will use the admin api of the api gateway to add itself to the upstream for the service
 instances. If no upstream is set up, one will be created automatically
@@ -356,4 +378,31 @@ func init() {
 		}
 	}
 
+}
+
+/*
+Initialization Step - Load SQL Queries
+
+This initialization step will load the supplied sql queries
+*/
+func init() {
+	vars.SqlQueries, _ = dotsql.LoadFromFile(vars.QueryFilePath)
+}
+
+/*
+Initialization Step - Create temporary directory
+
+This initialization step will load the supplied sql queries
+*/
+func init() {
+	logger := log.WithFields(
+		log.Fields{
+			"initStepName": "CREATE_TEMP_DIR",
+		},
+	)
+	var err error
+	vars.TemporaryDataDirectory, err = os.MkdirTemp(os.TempDir(), "*")
+	if err != nil {
+		logger.WithError(err).Fatal("unable to create temporary file directory")
+	}
 }
