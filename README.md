@@ -1,10 +1,21 @@
-# WISdoM OSS - Prophet Forecast Microservice
+# WISdoM OSS - Golang Microservice Template
+![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/wisdom-oss/microservice-template?filename=src%2Fgo.mod&style=for-the-badge)
 
-The prophet forecast microservice uses the prophet forecasting library published by Facebook to forecast
-the water usages. Furthermore, the microservice will use the current population forecasts to calculate a
-per-person water usage in cubic meters.
 
-Information on how to access this service are available in the openapi.yaml
+This repository contains the source code for a new microservice. You may use this source code
+for creating a new microservice which automatically registers at the api gateway and sets up
+a route on the gateway if needed.
+
+**DO NOT FORK THIS REPOSITORY SINCE THE COMMIT HISTORY WILL BE TRANSFERRED INTO THE NEW REPOSITORY**
+
+## Development Steps
+0. Install Golang on your development machine if not already installed
+1. Download the repository as archive to your development machine
+2. Create a new empty repository for your new service
+3. Decompress the downloaded archive into the empty repository
+4. You may now make your initial commit in the repository
+5. Look for all TODOs in the files and act according to the TODOs
+6. Enjoy writing your own microservice
 
 ## Configuration
 

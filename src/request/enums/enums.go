@@ -1,8 +1,8 @@
 package enums
 
+// MigrationLevel is a type constraint
 type MigrationLevel string
 
-// Enumerations for specifying the migration levels available for the prognosis
 const (
 	LowMigrationLevel    MigrationLevel = "low"
 	MediumMigrationLevel MigrationLevel = "medium"
