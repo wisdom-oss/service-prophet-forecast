@@ -1,6 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"microservice/structs"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -45,4 +49,47 @@ func ReadEnvironmentVariable(key string) (string, error) {
 	} else {
 		return "", vars.ErrEnvironmentVariableNotFound
 	}
+}
+
+// WriteDataToFile writes the supplied contents into a temporary directory
+func WriteDataToFile(content any, filename string) (int, error) {
+	filepath := fmt.Sprintf("%s/%s", vars.TemporaryDataDirectory, filename)
+	file, fileCreationError := os.Create(filepath)
+	if fileCreationError != nil {
+		return -1, fileCreationError
+	}
+
+	fileContents, jsonMarshalError := json.Marshal(content)
+
+	if jsonMarshalError != nil {
+		return -1, jsonMarshalError
+	}
+
+	bytesWritten, writeError := file.Write(fileContents)
+
+	if writeError != nil {
+		return -1, writeError
+	}
+
+	return bytesWritten, nil
+
+}
+
+// ReadPrognosisResultFile returns the results start year, end year, lower bound, medium bound, upper bound
+func ReadPrognosisResultFile(fileName string) []structs.OutputDataPoint {
+	var dataPoints []structs.OutputDataPoint
+
+	// Try to read the file
+	filePath := fmt.Sprintf("%s/%s", vars.TemporaryDataDirectory, fileName)
+	fileContents, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil
+	}
+
+	jsonError := json.Unmarshal(fileContents, &dataPoints)
+	if jsonError != nil {
+		return nil
+	}
+
+	return dataPoints
 }
