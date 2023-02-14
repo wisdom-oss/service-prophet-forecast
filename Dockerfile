@@ -5,7 +5,7 @@ RUN mkdir -p /tmp/build
 RUN go mod download
 RUN go build -o /tmp/build/app
 
-FROM rocker/r-ver:latest
+FROM ghcr.io/wisdom-oss/r-base:v1.0.1
 COPY --from=build-service /tmp/build/app /service
 COPY res /res
 RUN Rscript /res/packages.r
