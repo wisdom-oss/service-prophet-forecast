@@ -4,8 +4,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/redis/go-redis/v9"
 	"net/http"
 
 	"fmt"
@@ -29,6 +31,7 @@ var RequiredSettings = map[string]*string{
 	"PG_USER":          &vars.DatabaseUser,
 	"PG_PASS":          &vars.DatabaseUserPassword,
 	"SERVICE_PATH":     &vars.ServiceRoutePath,
+	"REDIS_ADDRESS":    &vars.RedisAddress,
 	// TODO: Add own required settings
 }
 
@@ -405,4 +408,25 @@ func init() {
 	if err != nil {
 		logger.WithError(err).Fatal("unable to create temporary file directory")
 	}
+}
+
+// initialization step - create a redis client
+func init() {
+	logger := log.WithFields(
+		log.Fields{
+			"initStepName": "CREATE_REDIS_CLIENT",
+		},
+	)
+	vars.RedisClient = redis.NewClient(&redis.Options{
+		Addr:     vars.RedisAddress,
+		Password: "",
+		DB:       1, // use db one since the db 0 may be used by other services
+	})
+
+	ctx := context.Background()
+	_, err := vars.RedisClient.Ping(ctx).Result()
+	if err != nil {
+		logger.WithError(err).Fatal("unable to create redis client")
+	}
+
 }

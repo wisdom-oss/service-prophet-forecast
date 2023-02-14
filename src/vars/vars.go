@@ -4,10 +4,10 @@ package vars
 
 import (
 	"database/sql"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 
 	"github.com/qustavo/dotsql"
-
 	"microservice/structs"
 )
 
@@ -32,6 +32,9 @@ var (
 
 	// DatabaseUserPassword is the password of the user accessing the database
 	DatabaseUserPassword string
+
+	// RedisAddress specifies to which redis database the microservice shall connect to to check for the queries
+	RedisAddress string
 )
 
 // ===== Optional Setting Variables =====
@@ -68,3 +71,6 @@ var HttpLogger zerolog.Logger
 
 // TemporaryDataDirectory stores the path for the temporary file directory
 var TemporaryDataDirectory string
+
+// RedisClient holds the connection to the redis server which caches the forecasts
+var RedisClient *redis.Client

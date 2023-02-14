@@ -41,21 +41,19 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 		return
 	}
 
-	// since we have shape keys they will now be put into a string array
-	shapeKeys := ctxShapeKeys.([]string)
+	// since we have shape keys they will now be put into a string
+	shapeKey := ctxShapeKeys.(string)
+
+	// before running the whole query check if the shape key is visible in the redis database
 
 	// now build a regex which matches any key and their possible children in the database
-	shapeKeyRegEx := "("
-	for _, shapeKey := range shapeKeys {
-		if len(shapeKey) < 12 {
-			missingNums := 12 - len(shapeKey)
-			shapeKeyRegEx += fmt.Sprintf(`%s\d{%d}|`, shapeKey, missingNums)
-		} else {
-			shapeKeyRegEx += fmt.Sprintf(`%s|`, shapeKey)
-		}
+	shapeKeyRegEx := ""
+	if len(shapeKey) < 12 {
+		missingNums := 12 - len(shapeKey)
+		shapeKeyRegEx += fmt.Sprintf(`%s\d{%d}`, shapeKey, missingNums)
+	} else {
+		shapeKeyRegEx += fmt.Sprintf(`%s`, shapeKey)
 	}
-	shapeKeyRegEx = strings.Trim(shapeKeyRegEx, "|")
-	shapeKeyRegEx += ")"
 
 	vars.HttpLogger.Info().Msg("getting municipality keys")
 	// now query the database for the municipal keys matching the query
