@@ -12,6 +12,7 @@ require (
 	github.com/qustavo/dotsql v1.1.0
 	github.com/rs/zerolog v1.27.0
 	github.com/wisdom-oss/golang-kong-access v0.2.2
+	github.com/redis/go-redis/v9 v9.0.2
 )
 
 require (
