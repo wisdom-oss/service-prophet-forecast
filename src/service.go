@@ -1,18 +1,15 @@
 package main
 
 import (
-	context2 "context"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
-	gateway "github.com/wisdom-oss/golang-kong-access"
 	wisdomMiddleware "github.com/wisdom-oss/microservice-middlewares/v2"
 	"microservice/globals"
 
 	middleware2 "microservice/request/middleware"
 	"microservice/request/routes"
-	"microservice/utils"
 	"net/http"
 	"os"
 	"os/signal"
@@ -70,31 +67,5 @@ func main() {
 	log.Info("Shutting down the microservice...")
 
 	log.Info("Closing the database connection")
-	dbCloseErr := vars.PostgresConnection.Close()
-	if dbCloseErr != nil {
-		log.WithError(dbCloseErr).Fatal("An error occurred while closing the connection to the database")
-	}
-	localIPAddress, _ := utils.LocalIPv4Address()
-	targetAddress := fmt.Sprintf("%s:%d", localIPAddress, vars.ListenPort)
-
-	success, err := gateway.DeleteUpstreamTarget(targetAddress, vars.ServiceName)
-	if err != nil {
-		log.WithError(err).Fatal("unable to deregister the service instance")
-	}
-
-	if success {
-		log.Info("deleted target from the upstream")
-	}
-
-	context, cancel := context2.WithTimeout(context2.Background(), time.Second*15)
-	defer cancel()
-
-	go func() {
-
-		err = server.Shutdown(context)
-		if err != nil {
-			log.WithError(err).Fatal("An error occurred while stopping the http server")
-		}
-	}()
 
 }

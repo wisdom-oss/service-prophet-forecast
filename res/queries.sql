@@ -6,11 +6,11 @@ WHERE key ~ $1 AND length(key) = 12;
 
 -- name: get-water-usages
 -- The parameter $1 will be an array of municipal keys
-SELECT year, sum(value) as usage
+SELECT cast(extract(epoch from date) as integer) as date, sum(amount) as usage
 FROM water_usage.usages
-WHERE municipal_key = ANY($1)
-GROUP BY year
-ORDER BY year;
+WHERE municipality = ANY($1)
+GROUP BY date
+ORDER BY date;
 
 -- name: get-current-population
 SELECT year, sum(population) as pop

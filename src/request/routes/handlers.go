@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gosimple/slug"
 	"github.com/lib/pq"
+	"microservice/globals"
 	"microservice/request/enums"
 	requestErrors "microservice/request/error"
 	"microservice/structs"
@@ -59,7 +60,7 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 
 	vars.HttpLogger.Info().Msg("getting municipality keys")
 	// now query the database for the municipal keys matching the query
-	shapeKeyRows, queryError := vars.SqlQueries.Query(vars.PostgresConnection, "get-full-municipality-keys", shapeKeyRegEx)
+	shapeKeyRows, queryError := vars.SqlQueries.Query(globals.Db, "get-full-municipality-keys", shapeKeyRegEx)
 	if queryError != nil {
 		// send back an error response
 		requestErrors.RespondWithInternalError(queryError, responseWriter)
@@ -83,7 +84,7 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 
 	// now prepare to get the water usage data from the database
 	vars.HttpLogger.Info().Msg("pulling water usage data")
-	waterUsageRows, queryError := vars.SqlQueries.Query(vars.PostgresConnection, "get-water-usages", pq.Array(municipalityKeys))
+	waterUsageRows, queryError := vars.SqlQueries.Query(globals.Db, "get-water-usages", pq.Array(municipalityKeys))
 	if queryError != nil {
 		// send back an error response
 		requestErrors.RespondWithInternalError(queryError, responseWriter)
@@ -111,7 +112,7 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 
 	// now get the current population data from the database
 	vars.HttpLogger.Info().Msg("pulling current population data")
-	currentPopulationRows, queryError := vars.SqlQueries.Query(vars.PostgresConnection, "get-current-population",
+	currentPopulationRows, queryError := vars.SqlQueries.Query(globals.Db, "get-current-population",
 		pq.Array(municipalityKeys),
 		datasetStartYear)
 	if queryError != nil {
@@ -127,7 +128,7 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 
 	// now get the predicted population data from the database
 	vars.HttpLogger.Info().Msg("pulling low migration population data")
-	lowMigrationLevelPopulationRows, queryError := vars.SqlQueries.Query(vars.PostgresConnection,
+	lowMigrationLevelPopulationRows, queryError := vars.SqlQueries.Query(globals.Db,
 		"get-future-population", pq.Array(municipalityKeys), enums.LowMigrationLevel)
 	if queryError != nil {
 		// send back an error response
@@ -141,7 +142,7 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 	}
 
 	vars.HttpLogger.Info().Msg("pulling medium migration population data")
-	mediumMigrationLevelPopulationRows, queryError := vars.SqlQueries.Query(vars.PostgresConnection,
+	mediumMigrationLevelPopulationRows, queryError := vars.SqlQueries.Query(globals.Db,
 		"get-future-population", pq.Array(municipalityKeys), enums.MediumMigrationLevel)
 	if queryError != nil {
 		// send back an error response
@@ -155,7 +156,7 @@ func ForecastRequest(responseWriter http.ResponseWriter, request *http.Request) 
 	}
 
 	vars.HttpLogger.Info().Msg("pulling high migration population data")
-	highMigrationLevelPopulationRows, queryError := vars.SqlQueries.Query(vars.PostgresConnection,
+	highMigrationLevelPopulationRows, queryError := vars.SqlQueries.Query(globals.Db,
 		"get-future-population", pq.Array(municipalityKeys), enums.HighMigrationLevel)
 	if queryError != nil {
 		// send back an error response
