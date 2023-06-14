@@ -7,6 +7,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog"
 	gateway "github.com/wisdom-oss/golang-kong-access"
+	wisdomMiddleware "github.com/wisdom-oss/microservice-middlewares/v2"
+	"microservice/globals"
+
 	middleware2 "microservice/request/middleware"
 	"microservice/request/routes"
 	"microservice/utils"
@@ -34,7 +37,7 @@ func main() {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(httplog.RequestLogger(vars.HttpLogger))
-	router.Use(middleware2.AuthorizationCheck)
+	router.Use(wisdomMiddleware.Authorization(globals.AuthorizationConfiguration, globals.ServiceName))
 	router.Use(middleware2.AdditionalResponseHeaders)
 	router.Use(middleware2.ParseQueryParametersToContext)
 	router.HandleFunc("/", routes.ForecastRequest)

@@ -1,0 +1,14 @@
+[
+  {
+    "code": "NO_SHAPE_KEYS",
+    "title": "No Shape Keys",
+    "description": "The request did not contain any shape keys",
+    "httpCode": 400
+  },
+  {
+    "code": "NO_WATER_USAGE_DATA",
+    "title": "Missing Base URI",
+    "description": "The request was formed correctly, but there are no water usage datasets available for the selected areas",
+    "httpCode": 503
+  }
+]

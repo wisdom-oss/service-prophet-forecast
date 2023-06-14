@@ -3,41 +3,8 @@ package middleware
 import (
 	"context"
 	"github.com/go-chi/chi/v5/middleware"
-	e "microservice/request/error"
-	"microservice/utils"
-	"microservice/vars"
 	"net/http"
-	"strings"
 )
-
-// AuthorizationCheck checks the incoming Authorization header from the API-Gateway
-func AuthorizationCheck(nextHandler http.Handler) http.Handler {
-	return http.HandlerFunc(
-		func(responseWriter http.ResponseWriter, request *http.Request) {
-			if request.URL.Path == "/healthcheck" {
-				nextHandler.ServeHTTP(responseWriter, request)
-				return
-			}
-			// Get the scopes the requesting user has
-			scopes := request.Header.Get("X-Authenticated-Scope")
-			// Check if the string is empty
-			if strings.TrimSpace(scopes) == "" {
-				err, _ := e.BuildRequestError(e.MissingAuthorizationInformation)
-				e.RespondWithRequestError(err, responseWriter)
-				return
-			}
-
-			scopeList := strings.Split(scopes, ",")
-			if !utils.ArrayContains(scopeList, vars.ScopeConfiguration.ScopeValue) {
-				err, _ := e.BuildRequestError(e.InsufficientScope)
-				e.RespondWithRequestError(err, responseWriter)
-				return
-			}
-			// Call the next handler which will continue handling the request
-			nextHandler.ServeHTTP(responseWriter, request)
-		},
-	)
-}
 
 // AdditionalResponseHeaders puts the request id and other aditional headers into the response
 func AdditionalResponseHeaders(nextHandler http.Handler) http.Handler {
